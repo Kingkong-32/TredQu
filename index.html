@@ -1,0 +1,3743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black & Gold Trading Journal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase untuk Google Login -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <style>
+        :root {
+            --primary-color: #FFD700;
+            --primary-light: #FFE55C;
+            --primary-dark: #CCA300;
+            --secondary-color: #000000;
+            --secondary-light: #1A1A1A;
+            --accent-color: #FFA500;
+            --success-color: #00FF00;
+            --danger-color: #FF3333;
+            --warning-color: #FFAA00;
+            --info-color: #00CCFF;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);
+            --transition: all 0.3s ease;
+            --gold-gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            --black-gradient: linear-gradient(135deg, #000000 0%, #1A1A1A 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--secondary-color);
+            color: #FFFFFF;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Login & Register Page */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: var(--black-gradient);
+        }
+
+        .auth-card {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo {
+            font-size: 36px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .auth-form {
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--gold-gradient);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .google-button {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .google-button:hover {
+            background: #f8f8f8;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 15px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Main App Container (initially hidden) */
+        .app-container {
+            display: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--black-gradient);
+            color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            box-shadow: 5px 0 25px rgba(255, 215, 0, 0.2);
+            border-right: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--secondary-color);
+            font-size: 16px;
+        }
+
+        .user-details {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: rgba(255, 215, 0, 0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .logout-btn {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 51, 51, 0.2);
+        }
+
+        .menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 215, 0, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            margin: 5px 10px;
+            border-radius: 6px;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .menu-item i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .menu-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .date-display {
+            background: var(--gold-gradient);
+            color: var(--secondary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--primary-light);
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        .neutral {
+            color: var(--primary-color);
+        }
+
+        /* Tips & Trik Section */
+        .tips-section {
+            margin: 20px 0;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .tip-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .tip-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .tip-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gold-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            font-size: 18px;
+        }
+
+        .tip-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .tip-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Candlestick Upload Section */
+        .upload-section {
+            margin: 20px 0;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            background: var(--gold-gradient);
+            color: var(--secondary-color);
+            padding: 10px 25px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: var(--transition);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Uploaded Patterns Grid */
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pattern-item {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .pattern-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .pattern-image-container {
+            height: 200px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .pattern-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .pattern-image:hover {
+            transform: scale(1.05);
+        }
+
+        .pattern-info {
+            padding: 15px;
+        }
+
+        .pattern-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .pattern-description {
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .pattern-type {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .type-bullish {
+            background: rgba(0, 255, 0, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .type-bearish {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .type-neutral {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .pattern-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 8px;
+        }
+
+        .delete-btn {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+            padding: 5px 15px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: var(--transition);
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 51, 51, 0.2);
+        }
+
+        /* Form untuk upload */
+        .upload-form {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--gold-gradient);
+            color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Page Container */
+        .page-container {
+            display: none;
+        }
+
+        .page-container.active {
+            display: block;
+        }
+
+        /* Form Styles */
+        .form-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-field {
+            margin-bottom: 15px;
+        }
+
+        .form-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary-light);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 14px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .buy-option {
+            color: var(--success-color);
+        }
+
+        .sell-option {
+            color: var(--danger-color);
+        }
+
+        .save-button {
+            width: 100%;
+            padding: 15px;
+            background: var(--gold-gradient);
+            color: var(--secondary-color);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        /* Trade History Styles */
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 14px;
+        }
+
+        .search-box {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 14px;
+            width: 250px;
+        }
+
+        .trade-table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .trade-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .trade-table th {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .trade-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        .trade-table tr:hover {
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .trade-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .position-buy {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .position-sell {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007BFF;
+            border: 1px solid rgba(0, 123, 255, 0.3);
+        }
+
+        .status-closed {
+            background: rgba(0, 255, 0, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .status-stopped {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+        }
+
+        .profit-positive {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .profit-negative {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid;
+        }
+
+        .edit-btn {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary-color);
+            border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .edit-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .delete-trade-btn {
+            background: rgba(255, 51, 51, 0.1);
+            color: var(--danger-color);
+            border-color: rgba(255, 51, 51, 0.3);
+        }
+
+        .delete-trade-btn:hover {
+            background: rgba(255, 51, 51, 0.2);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary-light);
+        }
+
+        .no-data i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* Analisis Page Styles - New */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .chart-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .chart-summary {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .chart-stat {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .chart-stat-label {
+            font-size: 12px;
+            color: var(--primary-light);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .chart-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .profit-distribution {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+        }
+
+        .distribution-item {
+            text-align: center;
+        }
+
+        .distribution-label {
+            font-size: 12px;
+            color: var(--primary-light);
+            margin-bottom: 5px;
+        }
+
+        .distribution-value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-btn {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .month-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .current-month {
+            color: var(--primary-color);
+            font-weight: 600;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tips-grid,
+            .patterns-grid,
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Container (Login/Register) -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-card">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h1 class="auth-title">Black & Gold Trading Journal</h1>
+                    <p class="auth-subtitle">Login untuk melanjutkan ke dashboard trading Anda</p>
+                </div>
+                
+                <div class="error-message" id="loginError"></div>
+                <div class="success-message" id="loginSuccess"></div>
+                
+                <form class="auth-form" id="loginFormElement">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="nama@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Masukkan password" required>
+                    </div>
+                    
+                    <button type="submit" class="auth-button">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                
+                <div class="divider">
+                    <span>ATAU</span>
+                </div>
+                
+                <button class="auth-button google-button" onclick="loginWithGoogle()">
+                    <i class="fab fa-google"></i> Login dengan Google
+                </button>
+                
+                <div class="auth-footer">
+                    Belum punya akun?
+                    <a class="auth-link" onclick="showRegisterForm()">Daftar disini</a>
+                </div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" style="display: none;">
+                <div class="auth-header">
+                    <div class="auth-logo">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h1 class="auth-title">Buat Akun Baru</h1>
+                    <p class="auth-subtitle">Daftar untuk mulai menggunakan trading journal</p>
+                </div>
+                
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess"></div>
+                
+                <form class="auth-form" id="registerFormElement">
+                    <div class="form-group">
+                        <label for="registerName">Nama Lengkap</label>
+                        <input type="text" id="registerName" placeholder="Nama lengkap Anda" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" placeholder="nama@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" placeholder="Minimal 6 karakter" minlength="6" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Konfirmasi Password</label>
+                        <input type="password" id="registerConfirmPassword" placeholder="Ulangi password" required>
+                    </div>
+                    
+                    <button type="submit" class="auth-button">
+                        <i class="fas fa-user-plus"></i> Daftar
+                    </button>
+                </form>
+                
+                <div class="divider">
+                    <span>ATAU</span>
+                </div>
+                
+                <button class="auth-button google-button" onclick="loginWithGoogle()">
+                    <i class="fab fa-google"></i> Daftar dengan Google
+                </button>
+                
+                <div class="auth-footer">
+                    Sudah punya akun?
+                    <a class="auth-link" onclick="showLoginForm()">Login disini</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App Container (Hidden until login) -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chart-line"></i> Trading Journal</h2>
+            </div>
+            
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-email" id="userEmail">user@example.com</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <div class="menu">
+                <a href="#dashboard" class="menu-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <a href="#new-trade" class="menu-item" data-page="new-trade">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Jurnal Transaksi</span>
+                </a>
+                
+                <a href="#trade-history" class="menu-item" data-page="trade-history">
+                    <i class="fas fa-history"></i>
+                    <span>Trade History</span>
+                </a>
+                
+                <a href="#analysis" class="menu-item" data-page="analysis">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analysis</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title" id="pageTitle">
+                        <i class="fas fa-home"></i> Dashboard
+                    </h1>
+                </div>
+                
+                <div class="date-display">
+                    <i class="far fa-clock"></i>
+                    <span id="currentDateTime"></span>
+                </div>
+            </div>
+            
+            <!-- Dashboard Page -->
+            <div class="page-container active" id="dashboard-page">
+                <!-- Quick Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Today's Trades</div>
+                        <div class="stat-value neutral" id="today-trades">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Today's P/L</div>
+                        <div class="stat-value" id="today-profit">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value neutral" id="today-win-rate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Trades</div>
+                        <div class="stat-value neutral" id="total-trades">0</div>
+                    </div>
+                </div>
+                
+                <!-- Tips & Trik Section -->
+                <div class="tips-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-lightbulb"></i> Tips & Trik Trading</h2>
+                        </div>
+                        
+                        <div class="tips-grid">
+                            <!-- Tip 1 -->
+                            <div class="tip-card">
+                                <div class="tip-header">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="tip-title">Risk Management</div>
+                                </div>
+                                <div class="tip-content">
+                                    Gunakan risiko maksimal 2% dari modal per trade. Selalu pasang stop loss sebelum entry dan hitung risk-reward ratio minimal 1:2.
+                                </div>
+                            </div>
+                            
+                            <!-- Tip 2 -->
+                            <div class="tip-card">
+                                <div class="tip-header">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <div class="tip-title">Psikologi Trading</div>
+                                </div>
+                                <div class="tip-content">
+                                    Kendalikan emosi, jangan serakah. Trading berdasarkan analisis, bukan feeling. Tetap disiplin dengan trading plan yang sudah dibuat.
+                                </div>
+                            </div>
+                            
+                            <!-- Tip 3 -->
+                            <div class="tip-card">
+                                <div class="tip-header">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="tip-title">Analisis Trend</div>
+                                </div>
+                                <div class="tip-content">
+                                    "The trend is your friend". Selalu identifikasi trend utama dan trade searah dengan trend. Gunakan timeframe yang lebih tinggi untuk konfirmasi.
+                                </div>
+                            </div>
+                            
+                            <!-- Tip 4 -->
+                            <div class="tip-card">
+                                <div class="tip-header">
+                                    <div class="tip-icon">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="tip-title">Money Management</div>
+                                </div>
+                                <div class="tip-content">
+                                    Jangan pernah risk modal lebih dari yang bisa Anda tanggung. Diversifikasi portfolio dan gunakan compounding untuk growth yang sustainable.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Candlestick Patterns Upload Section -->
+                <div class="upload-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-chart-candlestick"></i> Pola Candlestick Collection</h2>
+                            <button class="btn btn-primary" onclick="showUploadForm()">
+                                <i class="fas fa-plus"></i> Tambah Pola
+                            </button>
+                        </div>
+                        
+                        <!-- Upload Form (hidden by default) -->
+                        <div class="upload-form" id="uploadForm">
+                            <div class="form-group">
+                                <label for="patternName">Nama Pola</label>
+                                <input type="text" id="patternName" placeholder="Contoh: Hammer, Engulfing Bullish, dll">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="patternType">Tipe Pola</label>
+                                <select id="patternType">
+                                    <option value="bullish">Bullish (Naik)</option>
+                                    <option value="bearish">Bearish (Turun)</option>
+                                    <option value="neutral">Netral</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="patternDescription">Keterangan Pola</label>
+                                <textarea id="patternDescription" placeholder="Deskripsikan pola candlestick ini..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="patternFile">Upload Gambar</label>
+                                <div class="upload-area" onclick="document.getElementById('patternFile').click()">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="upload-text">Klik untuk upload gambar</div>
+                                    <div class="upload-subtext">PNG, JPG, GIF maksimal 5MB</div>
+                                    <div class="upload-btn">Pilih File</div>
+                                    <input type="file" id="patternFile" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="fileName" style="color: var(--primary-light); font-size: 14px; margin-top: 10px;"></div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button class="btn btn-secondary" onclick="hideUploadForm()">
+                                    <i class="fas fa-times"></i> Batal
+                                </button>
+                                <button class="btn btn-primary" onclick="uploadPattern()">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Uploaded Patterns Display -->
+                        <div id="uploadedPatterns">
+                            <div style="text-align: center; padding: 40px; color: var(--primary-light);">
+                                <i class="fas fa-chart-candlestick" style="font-size: 48px; margin-bottom: 15px;"></i>
+                                <div>Belum ada pola candlestick yang diupload</div>
+                                <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 10px;">
+                                    Klik "Tambah Pola" untuk mulai mengupload gambar pola candlestick
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- New Trade Page - JURNAL TRANSAKSI HARIAN -->
+            <div class="page-container" id="new-trade-page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-book"></i> JURNAL TRANSAKSI HARIAN</h2>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-info-circle"></i> Data Umum Transaksi</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="trade-date">Tanggal:</label>
+                                <input type="date" id="trade-date">
+                            </div>
+                            <div class="form-field">
+                                <label for="trade-time">Jam Entry:</label>
+                                <input type="time" id="trade-time">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="trade-pair">Pair:</label>
+                                <input type="text" id="trade-pair" placeholder="EUR/USD, GBP/JPY, dll">
+                            </div>
+                            <div class="form-field">
+                                <label for="trade-session">Sesi:</label>
+                                <select id="trade-session">
+                                    <option value="">Pilih sesi</option>
+                                    <option value="sydney">Sydney</option>
+                                    <option value="asia">Asia</option>
+                                    <option value="london">London</option>
+                                    <option value="newyork">New York</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="trade-timeframe">Timeframe Entry:</label>
+                            <select id="trade-timeframe">
+                                <option value="">Pilih timeframe</option>
+                                <option value="m1">M1</option>
+                                <option value="m5">M5</option>
+                                <option value="m15">M15</option>
+                                <option value="m30">M30</option>
+                                <option value="h1">H1</option>
+                                <option value="h4">H4</option>
+                                <option value="d1">D1</option>
+                                <option value="w1">W1</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-chart-line"></i> Detail Posisi</h3>
+                        <div class="form-field">
+                            <label>Jenis Posisi:</label>
+                            <div class="radio-group">
+                                <label class="radio-option buy-option">
+                                    <input type="radio" name="position-type" value="buy" id="buy-position">
+                                    <span>Buy</span>
+                                </label>
+                                <label class="radio-option sell-option">
+                                    <input type="radio" name="position-type" value="sell" id="sell-position">
+                                    <span>Sell</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="position-lot">Lot:</label>
+                                <input type="number" id="position-lot" step="0.01" value="0.1" min="0.01">
+                            </div>
+                            <div class="form-field">
+                                <label for="entry-price">Harga Entry:</label>
+                                <input type="number" id="entry-price" step="0.00001">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="stop-loss">Stop Loss:</label>
+                                <input type="number" id="stop-loss" step="0.00001">
+                            </div>
+                            <div class="form-field">
+                                <label for="take-profit">Take Profit:</label>
+                                <input type="number" id="take-profit" step="0.00001">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label for="risk-usd">Risiko (USD):</label>
+                                <input type="number" id="risk-usd" step="0.01">
+                            </div>
+                            <div class="form-field">
+                                <label for="risk-percent">Risiko (%):</label>
+                                <input type="number" id="risk-percent" step="0.01" max="100">
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="potential-reward">Reward Potensial:</label>
+                            <input type="number" id="potential-reward" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fas fa-search"></i> Alasan Entry</h3>
+                        <div class="form-field">
+                            <label for="entry-trend">Trend:</label>
+                            <select id="entry-trend">
+                                <option value="">Pilih trend</option>
+                                <option value="uptrend">Uptrend</option>
+                                <option value="downtrend">Downtrend</option>
+                                <option value="sideways">Sideways/Range</option>
+                                <option value="reversal">Reversal</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="candle-pattern">Pola Candlestick:</label>
+                            <input type="text" id="candle-pattern" placeholder="Hammer, Engulfing, Doji, dll">
+                        </div>
+                        <div class="form-field">
+                            <label for="area-type">Area:</label>
+                            <select id="area-type">
+                                <option value="">Pilih area</option>
+                                <option value="supply">Supply Zone</option>
+                                <option value="demand">Demand Zone</option>
+                                <option value="snr">Support & Resistance</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label for="additional-confirmation">Konfirmasi tambahan:</label>
+                            <textarea id="additional-confirmation" rows="3" placeholder="Indikator tambahan, pola chart, berita, dll..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <button class="save-button" onclick="saveTrade()">
+                        <i class="fas fa-save"></i> SIMPAN TRANSAKSI
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Trade History Page -->
+            <div class="page-container" id="trade-history-page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-history"></i> Trade History</h2>
+                    </div>
+                    
+                    <div class="history-controls">
+                        <div class="filter-group">
+                            <select class="filter-select" id="filterPosition" onchange="loadTradeHistory()">
+                                <option value="">Semua Posisi</option>
+                                <option value="buy">Buy</option>
+                                <option value="sell">Sell</option>
+                            </select>
+                            <select class="filter-select" id="filterStatus" onchange="loadTradeHistory()">
+                                <option value="">Semua Status</option>
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                                <option value="stopped">Stopped</option>
+                            </select>
+                            <select class="filter-select" id="filterSession" onchange="loadTradeHistory()">
+                                <option value="">Semua Sesi</option>
+                                <option value="sydney">Sydney</option>
+                                <option value="asia">Asia</option>
+                                <option value="london">London</option>
+                                <option value="newyork">New York</option>
+                            </select>
+                            <select class="filter-select" id="sortBy" onchange="loadTradeHistory()">
+                                <option value="date-desc">Terbaru</option>
+                                <option value="date-asc">Terlama</option>
+                                <option value="profit-desc">Profit Tertinggi</option>
+                                <option value="profit-asc">Profit Terendah</option>
+                            </select>
+                        </div>
+                        
+                        <input type="text" class="search-box" id="searchTrade" placeholder="Cari pair..." onkeyup="loadTradeHistory()">
+                    </div>
+                    
+                    <div class="trade-table-container">
+                        <table class="trade-table" id="tradeTable">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Pair</th>
+                                    <th>Posisi</th>
+                                    <th>Entry</th>
+                                    <th>SL/TP</th>
+                                    <th>Lot</th>
+                                    <th>Risiko</th>
+                                    <th>Profit/Loss</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tradeTableBody">
+                                <!-- Data akan diisi oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="tradeSummary" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: var(--border-radius); border: 1px solid rgba(255,215,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                            <div>
+                                <div style="color: var(--primary-light); font-size: 12px;">Total Trades</div>
+                                <div id="totalTradesCount" style="font-size: 18px; font-weight: 700; color: var(--primary-color);">0</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--primary-light); font-size: 12px;">Win Rate</div>
+                                <div id="winRatePercent" style="font-size: 18px; font-weight: 700; color: var(--primary-color);">0%</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--primary-light); font-size: 12px;">Total Profit</div>
+                                <div id="totalProfitAmount" style="font-size: 18px; font-weight: 700; color: var(--success-color);">$0.00</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--primary-light); font-size: 12px;">Average Risk/Reward</div>
+                                <div id="avgRiskReward" style="font-size: 18px; font-weight: 700; color: var(--primary-color);">0.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analysis Page - UPDATED WITH CHARTS -->
+            <div class="page-container" id="analysis-page">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar"></i> Performance Analysis</h2>
+                        <div class="month-selector">
+                            <button class="month-btn" onclick="changeMonth(-1)" title="Bulan sebelumnya">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="current-month" id="currentMonth">Oktober 2023</div>
+                            <button class="month-btn" onclick="changeMonth(1)" title="Bulan berikutnya">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-grid">
+                        <!-- Grafik Perjalanan Trading (Equity Curve) -->
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-chart-line"></i> Equity Curve</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="equityCurveChart"></canvas>
+                            </div>
+                            <div class="chart-summary">
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Profit Total</div>
+                                    <div class="chart-stat-value" id="totalEquityProfit">$0</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Profit Terbesar</div>
+                                    <div class="chart-stat-value" id="maxEquityProfit">$0</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Drawdown Maks</div>
+                                    <div class="chart-stat-value" id="maxDrawdown">0%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grafik Profit/Loss per Hari -->
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-money-bill-wave"></i> Daily Profit/Loss</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="dailyProfitChart"></canvas>
+                            </div>
+                            <div class="chart-summary">
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Hari Profit</div>
+                                    <div class="chart-stat-value" id="profitDays">0</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Hari Loss</div>
+                                    <div class="chart-stat-value" id="lossDays">0</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Avg Profit/Hari</div>
+                                    <div class="chart-stat-value" id="avgDailyProfit">$0</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grafik Distribusi Profit/Loss -->
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Win/Loss Distribution</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="winLossChart"></canvas>
+                            </div>
+                            <div class="profit-distribution">
+                                <div class="distribution-item">
+                                    <div class="distribution-label">Win Rate</div>
+                                    <div class="distribution-value" id="winRateDisplay">0%</div>
+                                </div>
+                                <div class="distribution-item">
+                                    <div class="distribution-label">Avg Win</div>
+                                    <div class="distribution-value" id="avgWin">$0</div>
+                                </div>
+                                <div class="distribution-item">
+                                    <div class="distribution-label">Avg Loss</div>
+                                    <div class="distribution-value" id="avgLoss">$0</div>
+                                </div>
+                                <div class="distribution-item">
+                                    <div class="distribution-label">Profit Factor</div>
+                                    <div class="distribution-value" id="profitFactor">0.00</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Grafik Profit/Loss per Pair -->
+                        <div class="chart-container">
+                            <h3 class="chart-title"><i class="fas fa-coins"></i> Profit per Trading Pair</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="pairProfitChart"></canvas>
+                            </div>
+                            <div class="chart-summary">
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Pair Terbaik</div>
+                                    <div class="chart-stat-value" id="bestPair">-</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Pair Terburuk</div>
+                                    <div class="chart-stat-value" id="worstPair">-</div>
+                                </div>
+                                <div class="chart-stat">
+                                    <div class="chart-stat-label">Total Pairs</div>
+                                    <div class="chart-stat-value" id="totalPairs">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ringkasan Statistik -->
+                    <div class="card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-chart-bar"></i> Trading Statistics Summary</h2>
+                        </div>
+                        <div class="stats-grid" style="margin-top: 15px;">
+                            <div class="stat-card">
+                                <div class="stat-label">Total Net Profit</div>
+                                <div class="stat-value" id="netProfitTotal">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Gross Profit</div>
+                                <div class="stat-value positive" id="grossProfit">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Gross Loss</div>
+                                <div class="stat-value negative" id="grossLoss">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Profit Factor</div>
+                                <div class="stat-value neutral" id="profitFactorTotal">0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Win Rate</div>
+                                <div class="stat-value neutral" id="winRateTotal">0%</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Avg Win</div>
+                                <div class="stat-value positive" id="avgWinTotal">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Avg Loss</div>
+                                <div class="stat-value negative" id="avgLossTotal">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Largest Win</div>
+                                <div class="stat-value positive" id="largestWin">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Largest Loss</div>
+                                <div class="stat-value negative" id="largestLoss">$0.00</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Max Drawdown</div>
+                                <div class="stat-value negative" id="maxDrawdownTotal">0%</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Avg Trade Duration</div>
+                                <div class="stat-value neutral" id="avgTradeDuration">0h</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Best Month</div>
+                                <div class="stat-value positive" id="bestMonth">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration (You need to replace with your own Firebase config)
+        // For demo purposes, we'll use localStorage as fallback
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEMO_KEY_FOR_DEMO_ONLY",
+            authDomain: "trading-journal-demo.firebaseapp.com",
+            projectId: "trading-journal-demo",
+            storageBucket: "trading-journal-demo.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
+        };
+
+        // Initialize Firebase (only if config is valid)
+        let firebaseApp = null;
+        let firebaseAuth = null;
+        
+        try {
+            // Check if Firebase config is valid (not demo)
+            if (firebaseConfig.apiKey && !firebaseConfig.apiKey.includes("DEMO")) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                firebaseAuth = firebaseApp.auth();
+            }
+        } catch (error) {
+            console.log("Firebase not initialized, using localStorage fallback");
+        }
+
+        // Chart instances
+        let equityCurveChart = null;
+        let dailyProfitChart = null;
+        let winLossChart = null;
+        let pairProfitChart = null;
+        
+        // Current month for analysis
+        let currentAnalysisMonth = new Date().getMonth();
+        let currentAnalysisYear = new Date().getFullYear();
+        
+        // Current user
+        let currentUser = null;
+        
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            initializeApp();
+        });
+        
+        function checkAuthStatus() {
+            // Check if user is logged in
+            const userData = localStorage.getItem('currentUser');
+            if (userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                    showApp();
+                } catch (e) {
+                    showAuth();
+                }
+            } else {
+                showAuth();
+            }
+        }
+        
+        function showAuth() {
+            document.getElementById('authContainer').style.display = 'flex';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+        
+        function showApp() {
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            
+            // Update user info
+            updateUserInfo();
+            
+            // Initialize app features
+            initializeAppFeatures();
+        }
+        
+        function initializeAppFeatures() {
+            // Set current date and time in WIB
+            updateWIBDateTime();
+            setInterval(updateWIBDateTime, 1000); // Update every second
+            
+            // Set default dates for trade form (current WIB time)
+            updateTradeFormTime();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Load uploaded patterns
+            loadUploadedPatterns();
+            
+            // Initialize analysis charts when analysis page is loaded
+            document.querySelector('a[data-page="analysis"]').addEventListener('click', function() {
+                setTimeout(() => {
+                    loadAnalysisData();
+                    updateAnalysisCharts();
+                }, 100);
+            });
+            
+            // Load trade history
+            loadTradeHistory();
+        }
+        
+        function updateUserInfo() {
+            if (currentUser) {
+                // Update user avatar
+                const avatar = document.getElementById('userAvatar');
+                if (currentUser.name) {
+                    const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    avatar.textContent = initials.substring(0, 2);
+                }
+                
+                // Update user name and email
+                document.getElementById('userName').textContent = currentUser.name || 'User';
+                document.getElementById('userEmail').textContent = currentUser.email || 'user@example.com';
+            }
+        }
+        
+        // ===== AUTHENTICATION FUNCTIONS =====
+        
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            clearAuthMessages();
+        }
+        
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            clearAuthMessages();
+        }
+        
+        function clearAuthMessages() {
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginSuccess').style.display = 'none';
+            document.getElementById('registerError').style.display = 'none';
+            document.getElementById('registerSuccess').style.display = 'none';
+        }
+        
+        // Handle Login Form Submission
+        document.getElementById('loginFormElement').addEventListener('submit', function(e) {
+            e.preventDefault();
+            loginUser();
+        });
+        
+        // Handle Register Form Submission
+        document.getElementById('registerFormElement').addEventListener('submit', function(e) {
+            e.preventDefault();
+            registerUser();
+        });
+        
+        function loginUser() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorElement = document.getElementById('loginError');
+            const successElement = document.getElementById('loginSuccess');
+            
+            // Clear messages
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+            
+            // Basic validation
+            if (!email || !password) {
+                errorElement.textContent = 'Email dan password harus diisi!';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            // Check if using Firebase
+            if (firebaseAuth) {
+                // Firebase login
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        currentUser = {
+                            id: user.uid,
+                            email: user.email,
+                            name: user.displayName || email.split('@')[0],
+                            provider: 'email'
+                        };
+                        
+                        // Save to localStorage
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        
+                        // Show success message
+                        successElement.textContent = 'Login berhasil!';
+                        successElement.style.display = 'block';
+                        
+                        // Show app after delay
+                        setTimeout(() => {
+                            showApp();
+                        }, 1000);
+                    })
+                    .catch((error) => {
+                        errorElement.textContent = 'Login gagal: ' + error.message;
+                        errorElement.style.display = 'block';
+                    });
+            } else {
+                // LocalStorage login (for demo)
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    currentUser = {
+                        id: user.id,
+                        email: user.email,
+                        name: user.name,
+                        provider: 'email'
+                    };
+                    
+                    // Save to localStorage
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Show success message
+                    successElement.textContent = 'Login berhasil!';
+                    successElement.style.display = 'block';
+                    
+                    // Show app after delay
+                    setTimeout(() => {
+                        showApp();
+                    }, 1000);
+                } else {
+                    errorElement.textContent = 'Email atau password salah!';
+                    errorElement.style.display = 'block';
+                }
+            }
+        }
+        
+        function registerUser() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const errorElement = document.getElementById('registerError');
+            const successElement = document.getElementById('registerSuccess');
+            
+            // Clear messages
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+            
+            // Validation
+            if (!name || !email || !password || !confirmPassword) {
+                errorElement.textContent = 'Semua field harus diisi!';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                errorElement.textContent = 'Password dan konfirmasi password tidak sama!';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorElement.textContent = 'Password minimal 6 karakter!';
+                errorElement.style.display = 'block';
+                return;
+            }
+            
+            // Check if using Firebase
+            if (firebaseAuth) {
+                // Firebase registration
+                firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        
+                        // Update profile with name
+                        return user.updateProfile({
+                            displayName: name
+                        }).then(() => {
+                            currentUser = {
+                                id: user.uid,
+                                email: user.email,
+                                name: name,
+                                provider: 'email'
+                            };
+                            
+                            // Save to localStorage
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                            
+                            // Save user to local users list
+                            const users = JSON.parse(localStorage.getItem('users') || '[]');
+                            users.push({
+                                id: user.uid,
+                                name: name,
+                                email: email,
+                                password: password // Note: In real app, never store plain passwords
+                            });
+                            localStorage.setItem('users', JSON.stringify(users));
+                            
+                            // Show success message
+                            successElement.textContent = 'Pendaftaran berhasil!';
+                            successElement.style.display = 'block';
+                            
+                            // Show app after delay
+                            setTimeout(() => {
+                                showApp();
+                            }, 1000);
+                        });
+                    })
+                    .catch((error) => {
+                        errorElement.textContent = 'Pendaftaran gagal: ' + error.message;
+                        errorElement.style.display = 'block';
+                    });
+            } else {
+                // LocalStorage registration (for demo)
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
+                
+                // Check if user already exists
+                if (users.find(u => u.email === email)) {
+                    errorElement.textContent = 'Email sudah terdaftar!';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Create new user
+                const newUser = {
+                    id: Date.now().toString(),
+                    name: name,
+                    email: email,
+                    password: password // Warning: In production, never store plain passwords!
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Set as current user
+                currentUser = {
+                    id: newUser.id,
+                    email: newUser.email,
+                    name: newUser.name,
+                    provider: 'email'
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Show success message
+                successElement.textContent = 'Pendaftaran berhasil!';
+                successElement.style.display = 'block';
+                
+                // Show app after delay
+                setTimeout(() => {
+                    showApp();
+                }, 1000);
+            }
+        }
+        
+        function loginWithGoogle() {
+            if (firebaseAuth) {
+                // Firebase Google login
+                const provider = new firebase.auth.GoogleAuthProvider();
+                
+                firebaseAuth.signInWithPopup(provider)
+                    .then((result) => {
+                        const user = result.user;
+                        currentUser = {
+                            id: user.uid,
+                            email: user.email,
+                            name: user.displayName,
+                            photoURL: user.photoURL,
+                            provider: 'google'
+                        };
+                        
+                        // Save to localStorage
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        
+                        // Show app
+                        showApp();
+                    })
+                    .catch((error) => {
+                        const errorElement = document.getElementById('loginError');
+                        errorElement.textContent = 'Login Google gagal: ' + error.message;
+                        errorElement.style.display = 'block';
+                    });
+            } else {
+                // Demo Google login (simulated)
+                const email = "demo.user@gmail.com";
+                const name = "Demo User";
+                
+                currentUser = {
+                    id: 'google_' + Date.now(),
+                    email: email,
+                    name: name,
+                    provider: 'google'
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Show success message
+                const successElement = document.getElementById('loginSuccess') || document.getElementById('registerSuccess');
+                successElement.textContent = 'Login dengan Google berhasil!';
+                successElement.style.display = 'block';
+                
+                // Show app after delay
+                setTimeout(() => {
+                    showApp();
+                }, 1000);
+            }
+        }
+        
+        function logout() {
+            if (firebaseAuth && currentUser?.provider === 'google') {
+                firebaseAuth.signOut().then(() => {
+                    // Sign-out successful
+                }).catch((error) => {
+                    console.error('Logout error:', error);
+                });
+            }
+            
+            // Clear current user
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            
+            // Show auth screen
+            showAuth();
+            showLoginForm();
+        }
+        
+        // ===== TRADING JOURNAL FUNCTIONS =====
+        
+        function updateWIBDateTime() {
+            const now = new Date();
+            
+            // WIB is UTC+7
+            const wibOffset = 7 * 60; // 7 hours in minutes
+            const localOffset = now.getTimezoneOffset();
+            const wibTime = new Date(now.getTime() + (wibOffset + localOffset) * 60000);
+            
+            // Format date
+            const optionsDate = { 
+                weekday: 'long',
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            
+            // Format time in 24-hour format (no am/pm)
+            const formattedDate = wibTime.toLocaleDateString('id-ID', optionsDate);
+            
+            // Format time manually in 24-hour format
+            const hours = wibTime.getHours().toString().padStart(2, '0');
+            const minutes = wibTime.getMinutes().toString().padStart(2, '0');
+            const seconds = wibTime.getSeconds().toString().padStart(2, '0');
+            const formattedTime = `${hours}:${minutes}:${seconds}`;
+            
+            document.getElementById('currentDateTime').innerHTML = `
+                ${formattedDate}<br>
+                <strong>${formattedTime} WIB</strong>
+            `;
+        }
+        
+        function updateTradeFormTime() {
+            const now = new Date();
+            
+            // WIB is UTC+7
+            const wibOffset = 7 * 60; // 7 hours in minutes
+            const localOffset = now.getTimezoneOffset();
+            const wibTime = new Date(now.getTime() + (wibOffset + localOffset) * 60000);
+            
+            // Format for date input (YYYY-MM-DD)
+            const dateString = wibTime.toISOString().split('T')[0];
+            
+            // Format for time input (HH:MM) - 24 hour format
+            const hours = wibTime.getHours().toString().padStart(2, '0');
+            const minutes = wibTime.getMinutes().toString().padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            
+            document.getElementById('trade-date').value = dateString;
+            document.getElementById('trade-time').value = timeString;
+        }
+        
+        function setupEventListeners() {
+            // Mobile menu
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+            
+            // Menu navigation
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    switchPage(page);
+                    
+                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (window.innerWidth <= 992) {
+                        toggleMobileMenu();
+                    }
+                    
+                    // Jika pindah ke dashboard, reload patterns
+                    if (page === 'dashboard') {
+                        loadUploadedPatterns();
+                    }
+                    
+                    // Jika pindah ke trade history, load trade history
+                    if (page === 'trade-history') {
+                        loadTradeHistory();
+                    }
+                    
+                    // Jika pindah ke analysis, load analysis data
+                    if (page === 'analysis') {
+                        setTimeout(() => {
+                            loadAnalysisData();
+                            updateAnalysisCharts();
+                        }, 100);
+                    }
+                });
+            });
+            
+            // File input change listener
+            document.getElementById('patternFile').addEventListener('change', function(e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
+                document.getElementById('fileName').textContent = `File: ${fileName}`;
+            });
+            
+            // Update trade form time when page is shown
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && document.getElementById('new-trade-page').classList.contains('active')) {
+                    updateTradeFormTime();
+                }
+            });
+        }
+        
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+        
+        function switchPage(page) {
+            // Hide all pages
+            document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
+            
+            // Show selected page
+            const selectedPage = document.getElementById(page + '-page');
+            if (selectedPage) {
+                selectedPage.classList.add('active');
+                
+                // Update page title
+                const titles = {
+                    'dashboard': 'Dashboard',
+                    'new-trade': 'Jurnal Transaksi',
+                    'trade-history': 'Trade History',
+                    'analysis': 'Analysis'
+                };
+                
+                const icons = {
+                    'dashboard': 'home',
+                    'new-trade': 'book',
+                    'trade-history': 'history',
+                    'analysis': 'chart-bar'
+                };
+                
+                document.getElementById('pageTitle').innerHTML = 
+                    `<i class="fas fa-${icons[page]}"></i> ${titles[page]}`;
+                
+                // Update trade form time if switching to new-trade page
+                if (page === 'new-trade') {
+                    updateTradeFormTime();
+                }
+            }
+        }
+        
+        function updateDashboard() {
+            const trades = getTrades();
+            const today = new Date().toDateString();
+            
+            // Calculate stats
+            const todayTrades = trades.filter(t => new Date(t.date).toDateString() === today);
+            const totalTrades = trades.length;
+            
+            // Calculate win rate
+            let winningTrades = 0;
+            trades.forEach(trade => {
+                if (trade.profitLoss > 0) winningTrades++;
+            });
+            const winRate = totalTrades > 0 ? Math.round((winningTrades / totalTrades) * 100) : 0;
+            
+            // Calculate today's profit
+            let todayProfit = 0;
+            trades.forEach(trade => {
+                if (new Date(trade.date).toDateString() === today) {
+                    todayProfit += (trade.profitLoss || 0);
+                }
+            });
+            
+            // Update display
+            document.getElementById('today-trades').textContent = todayTrades.length;
+            document.getElementById('today-profit').textContent = formatCurrency(todayProfit);
+            document.getElementById('today-profit').className = todayProfit >= 0 ? 'stat-value positive' : 'stat-value negative';
+            document.getElementById('today-win-rate').textContent = winRate + '%';
+            document.getElementById('total-trades').textContent = totalTrades;
+        }
+        
+        function saveTrade() {
+            // Check if user is logged in
+            if (!currentUser) {
+                alert('Silakan login terlebih dahulu!');
+                return;
+            }
+            
+            // Basic validation
+            const pair = document.getElementById('trade-pair').value;
+            const entryPrice = document.getElementById('entry-price').value;
+            const positionType = document.querySelector('input[name="position-type"]:checked');
+            
+            if (!pair || !entryPrice || !positionType) {
+                alert('Mohon isi semua field yang wajib diisi!');
+                return;
+            }
+            
+            // Calculate risk/reward if applicable
+            const sl = parseFloat(document.getElementById('stop-loss').value) || 0;
+            const tp = parseFloat(document.getElementById('take-profit').value) || 0;
+            let riskRewardRatio = 0;
+            if (sl > 0 && tp > 0) {
+                const risk = Math.abs(entryPrice - sl);
+                const reward = Math.abs(tp - entryPrice);
+                if (risk > 0) {
+                    riskRewardRatio = reward / risk;
+                }
+            }
+            
+            // Generate random profit/loss for demo
+            const randomProfit = (Math.random() > 0.6 ? 1 : -1) * (Math.random() * 50 + 10);
+            
+            // Get session based on WIB time
+            const timeValue = document.getElementById('trade-time').value;
+            const hour = parseInt(timeValue.split(':')[0]);
+            const session = determineSessionFromWIBTime(hour);
+            
+            // Create trade object
+            const trade = {
+                id: Date.now(),
+                userId: currentUser.id, // Link trade to user
+                date: document.getElementById('trade-date').value,
+                time: timeValue,
+                timezone: 'WIB',
+                pair: pair,
+                session: session,
+                timeframe: document.getElementById('trade-timeframe').value,
+                positionType: positionType.value,
+                lot: parseFloat(document.getElementById('position-lot').value) || 0.1,
+                entryPrice: parseFloat(entryPrice),
+                stopLoss: sl,
+                takeProfit: tp,
+                riskUSD: parseFloat(document.getElementById('risk-usd').value) || 0,
+                riskPercent: parseFloat(document.getElementById('risk-percent').value) || 0,
+                potentialReward: parseFloat(document.getElementById('potential-reward').value) || 0,
+                riskRewardRatio: riskRewardRatio.toFixed(2),
+                trend: document.getElementById('entry-trend').value,
+                candlePattern: document.getElementById('candle-pattern').value,
+                areaType: document.getElementById('area-type').value,
+                additionalConfirmation: document.getElementById('additional-confirmation').value,
+                profitLoss: randomProfit,
+                status: Math.random() > 0.7 ? 'open' : (Math.random() > 0.5 ? 'closed' : 'stopped'),
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            const trades = getTrades();
+            trades.push(trade);
+            saveTrades(trades);
+            
+            // Reset form
+            resetTradeForm();
+            
+            // Show success message
+            alert('Jurnal transaksi berhasil disimpan!');
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Switch to dashboard
+            switchPage('dashboard');
+        }
+        
+        function determineSessionFromWIBTime(wibHour) {
+            // Trading sessions in WIB (Waktu Indonesia Barat):
+            // Sydney session: 05:00 - 14:00 WIB
+            // Asia session: 07:00 - 16:00 WIB
+            // London session: 15:00 - 00:00 WIB
+            // New York session: 20:00 - 05:00 WIB (berlanjut ke hari berikutnya)
+            
+            if (wibHour >= 5 && wibHour < 14) {
+                return 'sydney'; // Sydney session overlap dengan Asia
+            } else if (wibHour >= 7 && wibHour < 16) {
+                return 'asia'; // Asia session
+            } else if (wibHour >= 15 && wibHour < 24) {
+                return 'london'; // London session
+            } else if (wibHour >= 20 && wibHour < 24) {
+                return 'newyork'; // New York session (overlap dengan London)
+            } else if (wibHour >= 0 && wibHour < 5) {
+                return 'newyork'; // New York session lanjutan
+            }
+            return '';
+        }
+        
+        function resetTradeForm() {
+            // Reset all form fields
+            updateTradeFormTime(); // Reset to current WIB time
+            document.getElementById('trade-pair').value = '';
+            document.getElementById('trade-session').value = '';
+            document.getElementById('trade-timeframe').value = '';
+            document.getElementById('position-lot').value = '0.1';
+            document.getElementById('entry-price').value = '';
+            document.getElementById('stop-loss').value = '';
+            document.getElementById('take-profit').value = '';
+            document.getElementById('risk-usd').value = '';
+            document.getElementById('risk-percent').value = '';
+            document.getElementById('potential-reward').value = '';
+            document.getElementById('entry-trend').value = '';
+            document.getElementById('candle-pattern').value = '';
+            document.getElementById('area-type').value = '';
+            document.getElementById('additional-confirmation').value = '';
+            
+            // Reset radio buttons
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+        }
+        
+        function loadTradeHistory() {
+            const trades = getTrades();
+            const tableBody = document.getElementById('tradeTableBody');
+            const filterPosition = document.getElementById('filterPosition').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterSession = document.getElementById('filterSession').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const searchTerm = document.getElementById('searchTrade').value.toLowerCase();
+            
+            // Filter trades (only show current user's trades)
+            let filteredTrades = trades.filter(trade => {
+                let matches = true;
+                
+                // Only show trades for current user
+                if (trade.userId !== currentUser.id) matches = false;
+                
+                if (filterPosition && trade.positionType !== filterPosition) matches = false;
+                if (filterStatus && trade.status !== filterStatus) matches = false;
+                if (filterSession && trade.session !== filterSession) matches = false;
+                if (searchTerm && !trade.pair.toLowerCase().includes(searchTerm)) matches = false;
+                
+                return matches;
+            });
+            
+            // Sort trades
+            filteredTrades.sort((a, b) => {
+                switch (sortBy) {
+                    case 'date-desc':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'date-asc':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'profit-desc':
+                        return b.profitLoss - a.profitLoss;
+                    case 'profit-asc':
+                        return a.profitLoss - b.profitLoss;
+                    default:
+                        return new Date(b.date) - new Date(a.date);
+                }
+            });
+            
+            // Calculate summary statistics
+            let totalTrades = filteredTrades.length;
+            let winningTrades = filteredTrades.filter(t => t.profitLoss > 0).length;
+            let totalProfit = filteredTrades.reduce((sum, t) => sum + t.profitLoss, 0);
+            let avgRiskReward = filteredTrades.length > 0 ? 
+                (filteredTrades.reduce((sum, t) => sum + parseFloat(t.riskRewardRatio || 0), 0) / filteredTrades.length).toFixed(2) : 0;
+            
+            // Update summary
+            document.getElementById('totalTradesCount').textContent = totalTrades;
+            document.getElementById('winRatePercent').textContent = totalTrades > 0 ? Math.round((winningTrades / totalTrades) * 100) + '%' : '0%';
+            document.getElementById('totalProfitAmount').textContent = formatCurrency(totalProfit);
+            document.getElementById('totalProfitAmount').className = totalProfit >= 0 ? 'profit-positive' : 'profit-negative';
+            document.getElementById('avgRiskReward').textContent = avgRiskReward;
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Check if no trades
+            if (filteredTrades.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="no-data">
+                            <i class="fas fa-chart-line"></i>
+                            <div style="margin-top: 10px;">Tidak ada data transaksi</div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 5px;">
+                                Mulai dengan menambahkan transaksi baru di menu "Jurnal Transaksi"
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Add trades to table
+            filteredTrades.forEach(trade => {
+                const row = document.createElement('tr');
+                
+                // Format date
+                const dateObj = new Date(trade.date);
+                const formattedDate = dateObj.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                // Format SL/TP
+                const slDisplay = trade.stopLoss ? trade.stopLoss.toFixed(5) : '-';
+                const tpDisplay = trade.takeProfit ? trade.takeProfit.toFixed(5) : '-';
+                
+                // Format status badge
+                let statusText = '';
+                let statusClass = '';
+                switch(trade.status) {
+                    case 'open':
+                        statusText = 'Open';
+                        statusClass = 'status-open';
+                        break;
+                    case 'closed':
+                        statusText = 'Closed';
+                        statusClass = 'status-closed';
+                        break;
+                    case 'stopped':
+                        statusText = 'Stopped';
+                        statusClass = 'status-stopped';
+                        break;
+                }
+                
+                row.innerHTML = `
+                    <td>
+                        <div>${formattedDate}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                            ${trade.time} WIB
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${trade.pair}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">${trade.timeframe}</div>
+                    </td>
+                    <td class="${trade.positionType === 'buy' ? 'position-buy' : 'position-sell'}">
+                        ${trade.positionType === 'buy' ? 'BUY' : 'SELL'}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${trade.entryPrice.toFixed(5)}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">${getSessionName(trade.session)}</div>
+                    </td>
+                    <td>
+                        <div>SL: ${slDisplay}</div>
+                        <div>TP: ${tpDisplay}</div>
+                    </td>
+                    <td>${trade.lot}</td>
+                    <td>
+                        <div>$${trade.riskUSD.toFixed(2)}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">${trade.riskPercent}%</div>
+                    </td>
+                    <td class="${trade.profitLoss >= 0 ? 'profit-positive' : 'profit-negative'}">
+                        ${formatCurrency(trade.profitLoss)}
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="action-btn edit-btn" onclick="editTrade(${trade.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-trade-btn" onclick="deleteTrade(${trade.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function editTrade(tradeId) {
+            const trades = getTrades();
+            const trade = trades.find(t => t.id === tradeId);
+            
+            if (!trade) {
+                alert('Transaksi tidak ditemukan!');
+                return;
+            }
+            
+            // Switch to new trade page
+            switchPage('new-trade');
+            
+            // Fill form with trade data
+            setTimeout(() => {
+                document.getElementById('trade-date').value = trade.date;
+                document.getElementById('trade-time').value = trade.time;
+                document.getElementById('trade-pair').value = trade.pair;
+                document.getElementById('trade-session').value = trade.session;
+                document.getElementById('trade-timeframe').value = trade.timeframe;
+                
+                // Set position type
+                if (trade.positionType === 'buy') {
+                    document.getElementById('buy-position').checked = true;
+                } else {
+                    document.getElementById('sell-position').checked = true;
+                }
+                
+                document.getElementById('position-lot').value = trade.lot;
+                document.getElementById('entry-price').value = trade.entryPrice;
+                document.getElementById('stop-loss').value = trade.stopLoss;
+                document.getElementById('take-profit').value = trade.takeProfit;
+                document.getElementById('risk-usd').value = trade.riskUSD;
+                document.getElementById('risk-percent').value = trade.riskPercent;
+                document.getElementById('potential-reward').value = trade.potentialReward;
+                document.getElementById('entry-trend').value = trade.trend;
+                document.getElementById('candle-pattern').value = trade.candlePattern;
+                document.getElementById('area-type').value = trade.areaType;
+                document.getElementById('additional-confirmation').value = trade.additionalConfirmation;
+                
+                // Update button text
+                const saveButton = document.querySelector('.save-button');
+                saveButton.innerHTML = '<i class="fas fa-save"></i> UPDATE TRANSAKSI';
+                saveButton.setAttribute('onclick', `updateTrade(${tradeId})`);
+            }, 100);
+        }
+        
+        function updateTrade(tradeId) {
+            // Similar to saveTrade but update existing trade
+            // Implementation would be similar to saveTrade but with update logic
+            alert('Fitur edit akan diimplementasi pada update berikutnya!');
+        }
+        
+        function deleteTrade(tradeId) {
+            if (confirm('Hapus transaksi ini?')) {
+                let trades = getTrades();
+                trades = trades.filter(t => t.id !== tradeId);
+                saveTrades(trades);
+                
+                // Reload trade history
+                loadTradeHistory();
+                
+                // Update dashboard
+                updateDashboard();
+                
+                // Update analysis charts if analysis page is active
+                if (document.getElementById('analysis-page').classList.contains('active')) {
+                    loadAnalysisData();
+                    updateAnalysisCharts();
+                }
+                
+                alert('Transaksi berhasil dihapus!');
+            }
+        }
+        
+        // ===== CANDLESTICK PATTERN UPLOAD FUNCTIONS =====
+        
+        function showUploadForm() {
+            document.getElementById('uploadForm').style.display = 'block';
+        }
+        
+        function hideUploadForm() {
+            document.getElementById('uploadForm').style.display = 'none';
+            resetUploadForm();
+        }
+        
+        function resetUploadForm() {
+            document.getElementById('patternName').value = '';
+            document.getElementById('patternType').value = 'bullish';
+            document.getElementById('patternDescription').value = '';
+            document.getElementById('patternFile').value = '';
+            document.getElementById('fileName').textContent = '';
+        }
+        
+        function uploadPattern() {
+            // Check if user is logged in
+            if (!currentUser) {
+                alert('Silakan login terlebih dahulu!');
+                return;
+            }
+            
+            const name = document.getElementById('patternName').value;
+            const type = document.getElementById('patternType').value;
+            const description = document.getElementById('patternDescription').value;
+            const fileInput = document.getElementById('patternFile');
+            
+            // Validation
+            if (!name.trim()) {
+                alert('Mohon isi nama pola!');
+                return;
+            }
+            
+            if (!description.trim()) {
+                alert('Mohon isi keterangan pola!');
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                alert('Mohon pilih gambar untuk diupload!');
+                return;
+            }
+            
+            // Check file size (max 5MB)
+            if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar! Maksimal 5MB.');
+                return;
+            }
+            
+            // Read file as data URL
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const pattern = {
+                    id: Date.now(),
+                    userId: currentUser.id, // Link pattern to user
+                    name: name,
+                    type: type,
+                    description: description,
+                    image: e.target.result, // Base64 image data
+                    date: new Date().toLocaleDateString('id-ID'),
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                // Save pattern to localStorage
+                savePattern(pattern);
+                
+                // Hide form and reset
+                hideUploadForm();
+                
+                // Reload patterns display
+                loadUploadedPatterns();
+                
+                // Show success message
+                alert('Pola candlestick berhasil diupload!');
+            };
+            
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+        
+        function savePattern(pattern) {
+            const patterns = getPatterns();
+            patterns.push(pattern);
+            savePatterns(patterns);
+        }
+        
+        function getPatterns() {
+            try {
+                return JSON.parse(localStorage.getItem('candlestickPatterns') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+        
+        function savePatterns(patterns) {
+            localStorage.setItem('candlestickPatterns', JSON.stringify(patterns));
+        }
+        
+        function loadUploadedPatterns() {
+            // Check if user is logged in
+            if (!currentUser) return;
+            
+            const patterns = getPatterns();
+            const container = document.getElementById('uploadedPatterns');
+            
+            // Filter patterns by current user
+            const userPatterns = patterns.filter(p => p.userId === currentUser.id);
+            
+            if (userPatterns.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--primary-light);">
+                        <i class="fas fa-chart-candlestick" style="font-size: 48px; margin-bottom: 15px;"></i>
+                        <div>Belum ada pola candlestick yang diupload</div>
+                        <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 10px;">
+                            Klik "Tambah Pola" untuk mulai mengupload gambar pola candlestick
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by upload date (newest first)
+            userPatterns.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+            
+            let html = '<div class="patterns-grid">';
+            
+            userPatterns.forEach(pattern => {
+                const typeLabel = pattern.type === 'bullish' ? 'Bullish' : 
+                                 pattern.type === 'bearish' ? 'Bearish' : 'Netral';
+                const typeClass = pattern.type === 'bullish' ? 'type-bullish' : 
+                                 pattern.type === 'bearish' ? 'type-bearish' : 'type-neutral';
+                
+                html += `
+                    <div class="pattern-item">
+                        <div class="pattern-image-container">
+                            <img src="${pattern.image}" alt="${pattern.name}" class="pattern-image">
+                        </div>
+                        <div class="pattern-info">
+                            <div class="pattern-name">${pattern.name}</div>
+                            <div class="pattern-description">${pattern.description}</div>
+                            <div class="${typeClass} pattern-type">${typeLabel}</div>
+                            <div class="pattern-date">Diupload: ${pattern.date}</div>
+                            <button class="delete-btn" onclick="deletePattern(${pattern.id})">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function deletePattern(patternId) {
+            if (confirm('Hapus pola candlestick ini?')) {
+                let patterns = getPatterns();
+                patterns = patterns.filter(p => p.id !== patternId);
+                savePatterns(patterns);
+                loadUploadedPatterns();
+                alert('Pola berhasil dihapus!');
+            }
+        }
+        
+        // ===== ANALYSIS FUNCTIONS =====
+        
+        function loadAnalysisData() {
+            // Update current month display
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
+                              "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('currentMonth').textContent = `${monthNames[currentAnalysisMonth]} ${currentAnalysisYear}`;
+        }
+        
+        function changeMonth(delta) {
+            currentAnalysisMonth += delta;
+            
+            if (currentAnalysisMonth < 0) {
+                currentAnalysisMonth = 11;
+                currentAnalysisYear--;
+            } else if (currentAnalysisMonth > 11) {
+                currentAnalysisMonth = 0;
+                currentAnalysisYear++;
+            }
+            
+            loadAnalysisData();
+            updateAnalysisCharts();
+        }
+        
+        function updateAnalysisCharts() {
+            const trades = getTrades();
+            
+            // Filter trades for current user
+            const userTrades = trades.filter(trade => trade.userId === currentUser.id);
+            
+            if (userTrades.length === 0) {
+                showNoDataInCharts();
+                return;
+            }
+            
+            // Filter trades for current month/year
+            const filteredTrades = userTrades.filter(trade => {
+                const tradeDate = new Date(trade.date);
+                return tradeDate.getMonth() === currentAnalysisMonth && 
+                       tradeDate.getFullYear() === currentAnalysisYear;
+            });
+            
+            if (filteredTrades.length === 0) {
+                showNoDataInCharts();
+                return;
+            }
+            
+            // Process data for charts
+            const analysisData = processAnalysisData(filteredTrades);
+            
+            // Update summary statistics
+            updateAnalysisSummary(analysisData);
+            
+            // Create or update charts
+            createEquityCurveChart(analysisData);
+            createDailyProfitChart(analysisData);
+            createWinLossChart(analysisData);
+            createPairProfitChart(analysisData);
+        }
+        
+        function processAnalysisData(trades) {
+            // Sort trades by date
+            trades.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const result = {
+                dates: [],
+                dailyProfit: [],
+                cumulativeProfit: [],
+                equityCurve: [0],
+                winTrades: [],
+                lossTrades: [],
+                pairs: {},
+                stats: {}
+            };
+            
+            let cumulative = 0;
+            let dailyProfitMap = {};
+            
+            // Group by date and calculate daily profit
+            trades.forEach(trade => {
+                const dateStr = trade.date;
+                if (!dailyProfitMap[dateStr]) {
+                    dailyProfitMap[dateStr] = 0;
+                }
+                dailyProfitMap[dateStr] += trade.profitLoss || 0;
+            });
+            
+            // Process dates and profits
+            Object.keys(dailyProfitMap).sort().forEach(dateStr => {
+                const profit = dailyProfitMap[dateStr];
+                cumulative += profit;
+                
+                result.dates.push(dateStr);
+                result.dailyProfit.push(profit);
+                result.cumulativeProfit.push(cumulative);
+                result.equityCurve.push(cumulative);
+            });
+            
+            // Calculate win/loss trades
+            result.winTrades = trades.filter(t => t.profitLoss > 0);
+            result.lossTrades = trades.filter(t => t.profitLoss < 0);
+            
+            // Group by pair
+            trades.forEach(trade => {
+                if (!result.pairs[trade.pair]) {
+                    result.pairs[trade.pair] = {
+                        total: 0,
+                        wins: 0,
+                        losses: 0
+                    };
+                }
+                result.pairs[trade.pair].total += trade.profitLoss || 0;
+                if (trade.profitLoss > 0) {
+                    result.pairs[trade.pair].wins++;
+                } else if (trade.profitLoss < 0) {
+                    result.pairs[trade.pair].losses++;
+                }
+            });
+            
+            // Calculate statistics
+            const totalTrades = trades.length;
+            const winningTrades = result.winTrades.length;
+            const losingTrades = result.lossTrades.length;
+            
+            const totalProfit = result.winTrades.reduce((sum, t) => sum + t.profitLoss, 0);
+            const totalLoss = Math.abs(result.lossTrades.reduce((sum, t) => sum + t.profitLoss, 0));
+            const netProfit = totalProfit - totalLoss;
+            
+            const avgWin = winningTrades > 0 ? totalProfit / winningTrades : 0;
+            const avgLoss = losingTrades > 0 ? totalLoss / losingTrades : 0;
+            const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit > 0 ? 100 : 0;
+            
+            // Find best and worst days
+            const bestDay = result.dailyProfit.length > 0 ? Math.max(...result.dailyProfit) : 0;
+            const worstDay = result.dailyProfit.length > 0 ? Math.min(...result.dailyProfit) : 0;
+            
+            // Calculate drawdown
+            let maxDrawdown = 0;
+            let peak = result.equityCurve[0];
+            
+            for (let i = 1; i < result.equityCurve.length; i++) {
+                if (result.equityCurve[i] > peak) {
+                    peak = result.equityCurve[i];
+                }
+                const drawdown = peak - result.equityCurve[i];
+                const drawdownPercent = peak !== 0 ? (drawdown / peak) * 100 : 0;
+                
+                if (drawdownPercent > maxDrawdown) {
+                    maxDrawdown = drawdownPercent;
+                }
+            }
+            
+            // Find best and worst pairs
+            let bestPair = { name: '', profit: -Infinity };
+            let worstPair = { name: '', profit: Infinity };
+            
+            Object.keys(result.pairs).forEach(pair => {
+                const profit = result.pairs[pair].total;
+                if (profit > bestPair.profit) {
+                    bestPair = { name: pair, profit: profit };
+                }
+                if (profit < worstPair.profit) {
+                    worstPair = { name: pair, profit: profit };
+                }
+            });
+            
+            result.stats = {
+                totalTrades,
+                winningTrades,
+                losingTrades,
+                winRate: totalTrades > 0 ? (winningTrades / totalTrades) * 100 : 0,
+                totalProfit,
+                totalLoss,
+                netProfit,
+                avgWin,
+                avgLoss,
+                profitFactor,
+                bestDay,
+                worstDay,
+                maxDrawdown,
+                bestPair,
+                worstPair,
+                profitDays: result.dailyProfit.filter(p => p > 0).length,
+                lossDays: result.dailyProfit.filter(p => p < 0).length,
+                avgDailyProfit: result.dailyProfit.length > 0 ? 
+                    result.dailyProfit.reduce((sum, p) => sum + p, 0) / result.dailyProfit.length : 0
+            };
+            
+            return result;
+        }
+        
+        function updateAnalysisSummary(data) {
+            const stats = data.stats;
+            
+            // Update equity curve summary
+            document.getElementById('totalEquityProfit').textContent = formatCurrencyShort(stats.netProfit);
+            document.getElementById('maxEquityProfit').textContent = formatCurrencyShort(Math.max(...data.cumulativeProfit) || 0);
+            document.getElementById('maxDrawdown').textContent = stats.maxDrawdown.toFixed(2) + '%';
+            
+            // Update daily profit summary
+            document.getElementById('profitDays').textContent = stats.profitDays;
+            document.getElementById('lossDays').textContent = stats.lossDays;
+            document.getElementById('avgDailyProfit').textContent = formatCurrencyShort(stats.avgDailyProfit);
+            
+            // Update win/loss distribution
+            document.getElementById('winRateDisplay').textContent = stats.winRate.toFixed(1) + '%';
+            document.getElementById('avgWin').textContent = formatCurrencyShort(stats.avgWin);
+            document.getElementById('avgLoss').textContent = formatCurrencyShort(stats.avgLoss);
+            document.getElementById('profitFactor').textContent = stats.profitFactor.toFixed(2);
+            
+            // Update pair profit summary
+            document.getElementById('bestPair').textContent = stats.bestPair.name || '-';
+            document.getElementById('worstPair').textContent = stats.worstPair.name || '-';
+            document.getElementById('totalPairs').textContent = Object.keys(data.pairs).length;
+            
+            // Update trading statistics summary
+            document.getElementById('netProfitTotal').textContent = formatCurrency(stats.netProfit);
+            document.getElementById('grossProfit').textContent = formatCurrency(stats.totalProfit);
+            document.getElementById('grossLoss').textContent = formatCurrency(stats.totalLoss);
+            document.getElementById('profitFactorTotal').textContent = stats.profitFactor.toFixed(2);
+            document.getElementById('winRateTotal').textContent = stats.winRate.toFixed(1) + '%';
+            document.getElementById('avgWinTotal').textContent = formatCurrency(stats.avgWin);
+            document.getElementById('avgLossTotal').textContent = formatCurrency(stats.avgLoss);
+            document.getElementById('largestWin').textContent = formatCurrency(stats.bestDay);
+            document.getElementById('largestLoss').textContent = formatCurrency(stats.worstDay);
+            document.getElementById('maxDrawdownTotal').textContent = stats.maxDrawdown.toFixed(2) + '%';
+            document.getElementById('avgTradeDuration').textContent = '24h'; // Placeholder
+            document.getElementById('bestMonth').textContent = 'Oktober 2023'; // Placeholder
+        }
+        
+        function createEquityCurveChart(data) {
+            const ctx = document.getElementById('equityCurveChart').getContext('2d');
+            
+            // Format dates for display
+            const formattedDates = data.dates.map(date => {
+                const d = new Date(date);
+                return `${d.getDate()}/${d.getMonth() + 1}`;
+            });
+            
+            // Destroy existing chart if it exists
+            if (equityCurveChart) {
+                equityCurveChart.destroy();
+            }
+            
+            equityCurveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: formattedDates,
+                    datasets: [{
+                        label: 'Equity Curve',
+                        data: data.cumulativeProfit,
+                        borderColor: '#FFD700',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#FFD700',
+                        pointBorderColor: '#000000',
+                        pointBorderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Profit: $${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createDailyProfitChart(data) {
+            const ctx = document.getElementById('dailyProfitChart').getContext('2d');
+            
+            // Format dates for display
+            const formattedDates = data.dates.map(date => {
+                const d = new Date(date);
+                return `${d.getDate()}/${d.getMonth() + 1}`;
+            });
+            
+            // Prepare data for positive and negative values
+            const positiveData = data.dailyProfit.map(value => value > 0 ? value : null);
+            const negativeData = data.dailyProfit.map(value => value < 0 ? value : null);
+            
+            // Destroy existing chart if it exists
+            if (dailyProfitChart) {
+                dailyProfitChart.destroy();
+            }
+            
+            dailyProfitChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: formattedDates,
+                    datasets: [
+                        {
+                            label: 'Profit',
+                            data: positiveData,
+                            backgroundColor: '#00FF00',
+                            borderColor: '#00CC00',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Loss',
+                            data: negativeData,
+                            backgroundColor: '#FF3333',
+                            borderColor: '#CC0000',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    return `${context.dataset.label}: $${Math.abs(value).toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                maxTicksLimit: 10
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createWinLossChart(data) {
+            const ctx = document.getElementById('winLossChart').getContext('2d');
+            
+            const winCount = data.stats.winningTrades;
+            const lossCount = data.stats.losingTrades;
+            const breakEvenCount = data.stats.totalTrades - winCount - lossCount;
+            
+            // Destroy existing chart if it exists
+            if (winLossChart) {
+                winLossChart.destroy();
+            }
+            
+            winLossChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Win', 'Loss', 'Break Even'],
+                    datasets: [{
+                        data: [winCount, lossCount, breakEvenCount],
+                        backgroundColor: [
+                            '#00FF00',
+                            '#FF3333',
+                            '#FFD700'
+                        ],
+                        borderColor: [
+                            '#00CC00',
+                            '#CC0000',
+                            '#CCA300'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label;
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} trades (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createPairProfitChart(data) {
+            const ctx = document.getElementById('pairProfitChart').getContext('2d');
+            
+            // Prepare data for chart
+            const pairs = Object.keys(data.pairs);
+            const profits = pairs.map(pair => data.pairs[pair].total);
+            
+            // Sort by profit (highest to lowest)
+            const sortedIndices = profits.map((_, i) => i)
+                .sort((a, b) => profits[b] - profits[a]);
+            
+            const sortedPairs = sortedIndices.map(i => pairs[i]);
+            const sortedProfits = sortedIndices.map(i => profits[i]);
+            
+            // Destroy existing chart if it exists
+            if (pairProfitChart) {
+                pairProfitChart.destroy();
+            }
+            
+            pairProfitChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedPairs,
+                    datasets: [{
+                        label: 'Profit/Loss per Pair',
+                        data: sortedProfits,
+                        backgroundColor: sortedProfits.map(profit => 
+                            profit >= 0 ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255, 51, 51, 0.7)'
+                        ),
+                        borderColor: sortedProfits.map(profit => 
+                            profit >= 0 ? '#00CC00' : '#CC0000'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const pair = context.label;
+                                    const profit = context.parsed.y;
+                                    const pairData = data.pairs[pair];
+                                    return [
+                                        `Pair: ${pair}`,
+                                        `Profit: $${profit.toFixed(2)}`,
+                                        `Wins: ${pairData.wins}, Losses: ${pairData.losses}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function showNoDataInCharts() {
+            // Show message in all chart containers
+            const chartContainers = document.querySelectorAll('.chart-wrapper');
+            chartContainers.forEach(container => {
+                container.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--primary-light);">
+                        <div style="text-align: center;">
+                            <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 10px;"></i>
+                            <div>Tidak ada data trading</div>
+                            <div style="font-size: 12px; margin-top: 5px;">Mulai trading untuk melihat analisis</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Reset all summary displays
+            const summaryElements = document.querySelectorAll('.chart-stat-value, .distribution-value');
+            summaryElements.forEach(el => {
+                if (el.id.includes('Profit') || el.id.includes('Win') || el.id.includes('Loss')) {
+                    el.textContent = '$0';
+                } else if (el.id.includes('Rate') || el.id.includes('Drawdown')) {
+                    el.textContent = '0%';
+                } else if (el.id.includes('Factor')) {
+                    el.textContent = '0.00';
+                } else if (el.id.includes('Days')) {
+                    el.textContent = '0';
+                } else if (el.id.includes('Pair')) {
+                    el.textContent = '-';
+                }
+            });
+            
+            // Reset trading statistics
+            const statElements = document.querySelectorAll('.stat-value');
+            statElements.forEach(el => {
+                if (el.id && !el.id.includes('today')) {
+                    if (el.id.includes('Profit') || el.id.includes('Win') || el.id.includes('Loss')) {
+                        el.textContent = '$0.00';
+                    } else if (el.id.includes('Rate') || el.id.includes('Drawdown')) {
+                        el.textContent = '0%';
+                    } else if (el.id.includes('Factor')) {
+                        el.textContent = '0.00';
+                    } else if (el.id.includes('Duration')) {
+                        el.textContent = '0h';
+                    } else if (el.id.includes('Month')) {
+                        el.textContent = '-';
+                    }
+                }
+            });
+        }
+        
+        // ===== HELPER FUNCTIONS =====
+        
+        function getTrades() {
+            try {
+                return JSON.parse(localStorage.getItem('trades') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+        
+        function saveTrades(trades) {
+            localStorage.setItem('trades', JSON.stringify(trades));
+        }
+        
+        function formatCurrency(amount) {
+            const sign = amount >= 0 ? '' : '-';
+            return `${sign}$${Math.abs(amount).toFixed(2)}`;
+        }
+        
+        function formatCurrencyShort(amount) {
+            const sign = amount >= 0 ? '' : '-';
+            return `${sign}$${Math.abs(amount).toFixed(0)}`;
+        }
+        
+        function getSessionName(session) {
+            switch(session) {
+                case 'sydney': return 'Sydney';
+                case 'asia': return 'Asia';
+                case 'london': return 'London';
+                case 'newyork': return 'New York';
+                default: return '';
+            }
+        }
+        
+        // Tambahkan beberapa data dummy untuk demo
+        function addDummyTrades() {
+            const dummyTrades = [
+                {
+                    id: 1,
+                    userId: 'demo_user',
+                    date: '2023-10-15',
+                    time: '09:30',
+                    timezone: 'WIB',
+                    pair: 'EUR/USD',
+                    session: 'asia',
+                    timeframe: 'h1',
+                    positionType: 'buy',
+                    lot: 0.1,
+                    entryPrice: 1.0550,
+                    stopLoss: 1.0530,
+                    takeProfit: 1.0580,
+                    riskUSD: 20,
+                    riskPercent: 1,
+                    potentialReward: 30,
+                    riskRewardRatio: '1.50',
+                    trend: 'uptrend',
+                    candlePattern: 'Bullish Engulfing',
+                    areaType: 'demand',
+                    additionalConfirmation: 'RSI oversold',
+                    profitLoss: 25.50,
+                    status: 'closed',
+                    createdAt: '2023-10-15T09:30:00Z'
+                },
+                {
+                    id: 2,
+                    userId: 'demo_user',
+                    date: '2023-10-16',
+                    time: '14:45',
+                    timezone: 'WIB',
+                    pair: 'GBP/JPY',
+                    session: 'london',
+                    timeframe: 'h4',
+                    positionType: 'sell',
+                    lot: 0.05,
+                    entryPrice: 184.50,
+                    stopLoss: 185.00,
+                    takeProfit: 183.50,
+                    riskUSD: 12.5,
+                    riskPercent: 0.5,
+                    potentialReward: 25,
+                    riskRewardRatio: '2.00',
+                    trend: 'downtrend',
+                    candlePattern: 'Bearish Pin Bar',
+                    areaType: 'supply',
+                    additionalConfirmation: 'MACD bearish cross',
+                    profitLoss: -8.75,
+                    status: 'stopped',
+                    createdAt: '2023-10-16T14:45:00Z'
+                },
+                {
+                    id: 3,
+                    userId: 'demo_user',
+                    date: '2023-10-17',
+                    time: '03:20',
+                    timezone: 'WIB',
+                    pair: 'USD/JPY',
+                    session: 'newyork',
+                    timeframe: 'm15',
+                    positionType: 'buy',
+                    lot: 0.2,
+                    entryPrice: 149.25,
+                    stopLoss: 149.00,
+                    takeProfit: 149.75,
+                    riskUSD: 50,
+                    riskPercent: 2,
+                    potentialReward: 100,
+                    riskRewardRatio: '2.00',
+                    trend: 'uptrend',
+                    candlePattern: 'Hammer',
+                    areaType: 'snr',
+                    additionalConfirmation: 'Price bounce from support',
+                    profitLoss: 42.80,
+                    status: 'closed',
+                    createdAt: '2023-10-17T03:20:00Z'
+                }
+            ];
+            
+            // Tambahkan dummy trades jika belum ada data
+            const currentTrades = getTrades();
+            const demoUserTrades = currentTrades.filter(t => t.userId === 'demo_user');
+            
+            if (demoUserTrades.length === 0) {
+                // Add dummy trades
+                dummyTrades.forEach(trade => {
+                    currentTrades.push(trade);
+                });
+                saveTrades(currentTrades);
+            }
+        }
+        
+        // Panggil fungsi untuk menambah dummy trades saat pertama kali load
+        addDummyTrades();
+    </script>
+</body>
+</html>
