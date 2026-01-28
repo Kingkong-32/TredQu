@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Black & Gold Trading Journal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK -->
@@ -42,6 +42,7 @@
             color: #FFFFFF;
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* Login & Register Page */
@@ -900,6 +901,7 @@
             overflow-x: auto;
             border-radius: var(--border-radius);
             border: 1px solid rgba(255, 215, 0, 0.1);
+            -webkit-overflow-scrolling: touch;
         }
 
         .trade-table {
@@ -1191,10 +1193,21 @@
             text-align: center;
         }
 
-        /* Responsive */
+        /* Responsive Styles for Mobile */
+        @media (max-width: 1200px) {
+            .analysis-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+            
+            .calculator-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
         @media (max-width: 992px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: 280px;
             }
             
             .sidebar.active {
@@ -1203,16 +1216,26 @@
             
             .main-content {
                 margin-left: 0;
+                padding: 15px;
             }
             
             .mobile-menu-btn {
                 display: flex;
             }
+            
+            .top-bar {
+                padding: 12px 15px;
+            }
+            
+            .date-display {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
         }
 
         @media (max-width: 768px) {
             .auth-card {
-                padding: 30px 20px;
+                padding: 25px 15px;
             }
             
             .stats-grid {
@@ -1250,6 +1273,164 @@
             
             .chart-wrapper {
                 height: 250px;
+            }
+            
+            .page-title {
+                font-size: 18px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .upload-section {
+                margin: 15px 0;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+            
+            .form-section {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
+            }
+            
+            .top-bar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .date-display {
+                align-self: flex-end;
+                margin-top: -40px;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+                padding: 10px;
+            }
+            
+            .user-details {
+                width: 100%;
+            }
+            
+            .menu-item {
+                padding: 10px 15px;
+                margin: 5px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .save-button {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .trade-table th,
+            .trade-table td {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            
+            .calculator-card {
+                padding: 15px;
+            }
+            
+            .calculator-title {
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .auth-card {
+                padding: 20px 12px;
+            }
+            
+            .auth-title {
+                font-size: 20px;
+            }
+            
+            .card {
+                padding: 12px;
+            }
+            
+            .form-field input,
+            .form-field select,
+            .form-field textarea {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .chart-wrapper {
+                height: 200px;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .menu-item,
+            .btn,
+            .auth-button,
+            .save-button,
+            .action-btn,
+            .delete-btn,
+            .upload-btn {
+                min-height: 44px;
+            }
+            
+            .form-field input,
+            .form-field select,
+            .form-field textarea {
+                min-height: 44px;
+            }
+            
+            .radio-option {
+                min-height: 44px;
+                align-items: center;
+            }
+            
+            .filter-select {
+                min-height: 44px;
+            }
+            
+            .search-box {
+                min-height: 44px;
+            }
+            
+            .month-btn {
+                width: 44px;
+                height: 44px;
+            }
+            
+            .mobile-menu-btn {
+                width: 44px;
+                height: 44px;
             }
         }
     </style>
@@ -1673,20 +1854,6 @@
                                 <input type="number" id="take-profit" step="0.00001">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-field">
-                                <label for="risk-usd">Risiko (USD):</label>
-                                <input type="number" id="risk-usd" step="0.01">
-                            </div>
-                            <div class="form-field">
-                                <label for="risk-percent">Risiko (%):</label>
-                                <input type="number" id="risk-percent" step="0.01" max="100">
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <label for="potential-reward">Reward Potensial:</label>
-                            <input type="number" id="potential-reward" step="0.01">
-                        </div>
                     </div>
                     
                     <div class="form-section">
@@ -1774,9 +1941,8 @@
                                     <th>Entry</th>
                                     <th>SL/TP</th>
                                     <th>Lot</th>
-                                    <th>Risiko</th>
-                                    <th>Profit/Loss</th>
                                     <th>Status</th>
+                                    <th>Profit/Loss</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -1800,10 +1966,6 @@
                                 <div style="color: var(--primary-light); font-size: 12px;">Total Profit</div>
                                 <div id="totalProfitAmount" style="font-size: 18px; font-weight: 700; color: var(--success-color);">$0.00</div>
                             </div>
-                            <div>
-                                <div style="color: var(--primary-light); font-size: 12px;">Average Risk/Reward</div>
-                                <div id="avgRiskReward" style="font-size: 18px; font-weight: 700; color: var(--primary-color);">0.00</div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1817,11 +1979,12 @@
                     </div>
                     
                     <div class="calculator-grid">
+                        <!-- Lots Calculator -->
                         <div class="calculator-card">
-                            <h3 class="calculator-title"><i class="fas fa-coins"></i> Position Size Calculator</h3>
+                            <h3 class="calculator-title"><i class="fas fa-calculator"></i> Lots Calculator</h3>
                             
                             <div class="form-group">
-                                <label for="calc-account-balance">Account Balance (USD):</label>
+                                <label for="calc-account-balance">Account Balance ($):</label>
                                 <input type="number" id="calc-account-balance" value="10000" step="100">
                             </div>
                             
@@ -1842,49 +2005,31 @@
                             </div>
                             
                             <div class="form-group">
-                                <label for="calc-entry-price">Entry Price:</label>
-                                <input type="number" id="calc-entry-price" value="1.0500" step="0.0001">
+                                <label for="calc-stop-pips">Stop Loss (pips):</label>
+                                <input type="number" id="calc-stop-pips" value="20" step="1" min="1">
                             </div>
                             
-                            <div class="form-group">
-                                <label for="calc-stop-loss">Stop Loss Price:</label>
-                                <input type="number" id="calc-stop-loss" value="1.0480" step="0.0001">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="calc-account-currency">Account Currency:</label>
-                                <select id="calc-account-currency">
-                                    <option value="USD">USD</option>
-                                    <option value="IDR">IDR</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="JPY">JPY</option>
-                                </select>
-                            </div>
-                            
-                            <button class="btn btn-primary" id="calculatePositionBtn">
-                                <i class="fas fa-calculator"></i> Calculate Position Size
+                            <button class="btn btn-primary" id="calculateLotsBtn">
+                                <i class="fas fa-calculator"></i> Calculate Lots
                             </button>
                             
-                            <div class="calculator-results" id="positionResults">
+                            <div class="calculator-results" id="lotsResults">
                                 <div class="result-item">
                                     <span class="result-label">Risk Amount:</span>
                                     <span class="result-value" id="risk-amount">$200.00</span>
                                 </div>
                                 <div class="result-item">
-                                    <span class="result-label">Position Size (Lots):</span>
-                                    <span class="result-value" id="position-size">2.00</span>
+                                    <span class="result-label">Lot Size:</span>
+                                    <span class="result-value" id="lot-size">0.20</span>
                                 </div>
                                 <div class="result-item">
-                                    <span class="result-label">Pips to Stop Loss:</span>
-                                    <span class="result-value" id="pips-to-sl">20 pips</span>
-                                </div>
-                                <div class="result-item">
-                                    <span class="result-label">Value per Pip:</span>
-                                    <span class="result-value" id="value-per-pip">$10.00</span>
+                                    <span class="result-label">Position Value:</span>
+                                    <span class="result-value" id="position-value">$20,000</span>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- Pips Calculator -->
                         <div class="calculator-card">
                             <h3 class="calculator-title"><i class="fas fa-exchange-alt"></i> Pips Calculator</h3>
                             
@@ -1925,63 +2070,6 @@
                                 <div class="result-item">
                                     <span class="result-label">Profit/Loss:</span>
                                     <span class="result-value" id="profit-loss-result">$200.00</span>
-                                </div>
-                                <div class="result-item">
-                                    <span class="result-label">Percentage Change:</span>
-                                    <span class="result-value" id="percentage-change">0.19%</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="calculator-card">
-                            <h3 class="calculator-title"><i class="fas fa-percentage"></i> Margin Calculator</h3>
-                            
-                            <div class="form-group">
-                                <label for="calc-pair-margin">Trading Pair:</label>
-                                <select id="calc-pair-margin">
-                                    <option value="EUR/USD">EUR/USD</option>
-                                    <option value="GBP/USD">GBP/USD</option>
-                                    <option value="USD/JPY">USD/JPY</option>
-                                    <option value="XAU/USD">XAU/USD (Gold)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="calc-leverage">Leverage:</label>
-                                <select id="calc-leverage">
-                                    <option value="50">1:50</option>
-                                    <option value="100">1:100</option>
-                                    <option value="200">1:200</option>
-                                    <option value="500">1:500</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="calc-lot-size">Lot Size:</label>
-                                <input type="number" id="calc-lot-size" value="1.00" step="0.01">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="calc-current-price">Current Price:</label>
-                                <input type="number" id="calc-current-price" value="1.0500" step="0.0001">
-                            </div>
-                            
-                            <button class="btn btn-primary" id="calculateMarginBtn">
-                                <i class="fas fa-calculator"></i> Calculate Margin
-                            </button>
-                            
-                            <div class="calculator-results" id="marginResults">
-                                <div class="result-item">
-                                    <span class="result-label">Required Margin:</span>
-                                    <span class="result-value" id="required-margin">$2,100.00</span>
-                                </div>
-                                <div class="result-item">
-                                    <span class="result-label">Free Margin:</span>
-                                    <span class="result-value" id="free-margin">$7,900.00</span>
-                                </div>
-                                <div class="result-item">
-                                    <span class="result-label">Margin Level:</span>
-                                    <span class="result-value" id="margin-level">476.19%</span>
                                 </div>
                             </div>
                         </div>
@@ -2162,7 +2250,6 @@
 
     <script>
         // ===== FIREBASE CONFIGURATION =====
-        // Ganti dengan konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyDEMO_KEY_FOR_DEMO_ONLY",
             authDomain: "trading-journal-demo.firebaseapp.com",
@@ -2479,13 +2566,25 @@
             document.getElementById('patternFile').addEventListener('change', handleFileSelect);
             
             // Forex Calculator
-            document.getElementById('calculatePositionBtn').addEventListener('click', calculatePositionSize);
+            document.getElementById('calculateLotsBtn').addEventListener('click', calculateLots);
             document.getElementById('calculatePipsBtn').addEventListener('click', calculatePips);
-            document.getElementById('calculateMarginBtn').addEventListener('click', calculateMargin);
             
             // Analysis
             document.getElementById('prevMonthBtn').addEventListener('click', () => changeMonth(-1));
             document.getElementById('nextMonthBtn').addEventListener('click', () => changeMonth(1));
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                const sidebar = document.getElementById('sidebar');
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                
+                if (window.innerWidth <= 992 && 
+                    sidebar.classList.contains('active') &&
+                    !sidebar.contains(e.target) &&
+                    !mobileMenuBtn.contains(e.target)) {
+                    toggleMobileMenu();
+                }
+            });
         }
 
         // ===== APP FEATURES =====
@@ -2508,6 +2607,11 @@
                     input.placeholder = 'Masukkan pair (contoh: BTC/USD)';
                     input.style.marginTop = '5px';
                     input.style.width = '100%';
+                    input.style.padding = '10px';
+                    input.style.background = 'rgba(0, 0, 0, 0.5)';
+                    input.style.border = '1px solid rgba(255, 215, 0, 0.3)';
+                    input.style.borderRadius = 'var(--border-radius)';
+                    input.style.color = 'white';
                     this.parentNode.appendChild(input);
                 } else {
                     const customInput = document.getElementById('trade-pair-custom');
@@ -2603,9 +2707,8 @@
                 } else if (page === 'trade-history') {
                     loadTradeHistory();
                 } else if (page === 'calculator') {
-                    calculatePositionSize();
+                    calculateLots();
                     calculatePips();
-                    calculateMargin();
                 } else if (page === 'analysis') {
                     setTimeout(() => {
                         loadAnalysisData();
@@ -2637,17 +2740,9 @@
                 return;
             }
             
-            // Get or generate trade data
             const sl = parseFloat(document.getElementById('stop-loss').value) || 0;
             const tp = parseFloat(document.getElementById('take-profit').value) || 0;
-            let riskRewardRatio = 0;
-            if (sl > 0 && tp > 0) {
-                const risk = Math.abs(entryPrice - sl);
-                const reward = Math.abs(tp - entryPrice);
-                if (risk > 0) {
-                    riskRewardRatio = reward / risk;
-                }
-            }
+            const lot = parseFloat(document.getElementById('position-lot').value) || 0.1;
             
             const randomProfit = (Math.random() > 0.6 ? 1 : -1) * (Math.random() * 50 + 10);
             const timeValue = document.getElementById('trade-time').value;
@@ -2664,14 +2759,10 @@
                 session: session,
                 timeframe: document.getElementById('trade-timeframe').value,
                 positionType: positionType.value,
-                lot: parseFloat(document.getElementById('position-lot').value) || 0.1,
+                lot: lot,
                 entryPrice: parseFloat(entryPrice),
                 stopLoss: sl,
                 takeProfit: tp,
-                riskUSD: parseFloat(document.getElementById('risk-usd').value) || 0,
-                riskPercent: parseFloat(document.getElementById('risk-percent').value) || 0,
-                potentialReward: parseFloat(document.getElementById('potential-reward').value) || 0,
-                riskRewardRatio: riskRewardRatio.toFixed(2),
                 trend: document.getElementById('entry-trend').value,
                 candlePattern: document.getElementById('candle-pattern').value,
                 areaType: document.getElementById('area-type').value,
@@ -2711,9 +2802,6 @@
             document.getElementById('entry-price').value = '';
             document.getElementById('stop-loss').value = '';
             document.getElementById('take-profit').value = '';
-            document.getElementById('risk-usd').value = '';
-            document.getElementById('risk-percent').value = '';
-            document.getElementById('potential-reward').value = '';
             document.getElementById('entry-trend').value = '';
             document.getElementById('candle-pattern').value = '';
             document.getElementById('area-type').value = '';
@@ -2754,21 +2842,18 @@
             let totalTrades = filteredTrades.length;
             let winningTrades = filteredTrades.filter(t => t.profitLoss > 0).length;
             let totalProfit = filteredTrades.reduce((sum, t) => sum + t.profitLoss, 0);
-            let avgRiskReward = filteredTrades.length > 0 ? 
-                (filteredTrades.reduce((sum, t) => sum + parseFloat(t.riskRewardRatio || 0), 0) / filteredTrades.length).toFixed(2) : 0;
             
             document.getElementById('totalTradesCount').textContent = totalTrades;
             document.getElementById('winRatePercent').textContent = totalTrades > 0 ? Math.round((winningTrades / totalTrades) * 100) + '%' : '0%';
             document.getElementById('totalProfitAmount').textContent = formatCurrency(totalProfit);
             document.getElementById('totalProfitAmount').className = totalProfit >= 0 ? 'profit-positive' : 'profit-negative';
-            document.getElementById('avgRiskReward').textContent = avgRiskReward;
             
             tableBody.innerHTML = '';
             
             if (filteredTrades.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="no-data">
+                        <td colspan="9" class="no-data">
                             <i class="fas fa-chart-line"></i>
                             <div style="margin-top: 10px;">Tidak ada data transaksi</div>
                         </td>
@@ -2809,24 +2894,17 @@
                     <td class="${trade.positionType === 'buy' ? 'position-buy' : 'position-sell'}">
                         ${trade.positionType === 'buy' ? 'BUY' : 'SELL'}
                     </td>
-                    <td>
-                        <div style="font-weight: 600;">${trade.entryPrice.toFixed(5)}</div>
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">${getSessionName(trade.session)}</div>
-                    </td>
+                    <td>${trade.entryPrice.toFixed(5)}</td>
                     <td>
                         <div>SL: ${slDisplay}</div>
                         <div>TP: ${tpDisplay}</div>
                     </td>
                     <td>${trade.lot}</td>
                     <td>
-                        <div>$${trade.riskUSD.toFixed(2)}</div>
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">${trade.riskPercent}%</div>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
                     </td>
                     <td class="${trade.profitLoss >= 0 ? 'profit-positive' : 'profit-negative'}">
                         ${formatCurrency(trade.profitLoss)}
-                    </td>
-                    <td>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
                     </td>
                     <td>
                         <div class="action-buttons">
@@ -2872,9 +2950,6 @@
                 document.getElementById('entry-price').value = trade.entryPrice;
                 document.getElementById('stop-loss').value = trade.stopLoss;
                 document.getElementById('take-profit').value = trade.takeProfit;
-                document.getElementById('risk-usd').value = trade.riskUSD;
-                document.getElementById('risk-percent').value = trade.riskPercent;
-                document.getElementById('potential-reward').value = trade.potentialReward;
                 document.getElementById('entry-trend').value = trade.trend;
                 document.getElementById('candle-pattern').value = trade.candlePattern;
                 document.getElementById('area-type').value = trade.areaType;
@@ -3055,40 +3130,32 @@
         }
 
         // ===== FOREX CALCULATOR FUNCTIONS =====
-        function calculatePositionSize() {
+        function calculateLots() {
             const accountBalance = parseFloat(document.getElementById('calc-account-balance').value) || 10000;
             const riskPercent = parseFloat(document.getElementById('calc-risk-percent').value) || 2;
             const pair = document.getElementById('calc-pair').value;
-            const entryPrice = parseFloat(document.getElementById('calc-entry-price').value) || 1.0500;
-            const stopLoss = parseFloat(document.getElementById('calc-stop-loss').value) || 1.0480;
-            const accountCurrency = document.getElementById('calc-account-currency').value;
+            const stopPips = parseFloat(document.getElementById('calc-stop-pips').value) || 20;
             
             // Calculate risk amount
             const riskAmount = (accountBalance * riskPercent) / 100;
             
-            // Calculate pips difference
-            let pipsToSL = 0;
-            if (pair.includes('JPY') || pair === 'XAU/USD') {
-                pipsToSL = Math.abs(entryPrice - stopLoss) * 100;
-            } else {
-                pipsToSL = Math.abs(entryPrice - stopLoss) * 10000;
-            }
-            
-            // Calculate position size
-            let pipValue = 10; // Default for EUR/USD
+            // Calculate lot size based on pair
+            let pipValue = 10; // Standard for EUR/USD
             if (pair === 'XAU/USD') {
-                pipValue = 1; // Gold has different pip value
+                pipValue = 1;
             } else if (pair.includes('JPY')) {
-                pipValue = 9.09; // Approximation for JPY pairs
+                pipValue = 9.09;
             }
             
-            const positionSize = (riskAmount / pipsToSL) * pipValue;
+            const lotSize = riskAmount / (stopPips * pipValue);
+            
+            // Calculate position value (1 lot = 100,000 units)
+            const positionValue = lotSize * 100000;
             
             // Update results
             document.getElementById('risk-amount').textContent = formatCurrency(riskAmount);
-            document.getElementById('position-size').textContent = positionSize.toFixed(2) + ' lots';
-            document.getElementById('pips-to-sl').textContent = Math.round(pipsToSL) + ' pips';
-            document.getElementById('value-per-pip').textContent = formatCurrency(pipValue * (positionSize / pipValue));
+            document.getElementById('lot-size').textContent = lotSize.toFixed(2);
+            document.getElementById('position-value').textContent = formatCurrency(positionValue);
         }
 
         function calculatePips() {
@@ -3113,35 +3180,10 @@
             
             // Calculate profit/loss
             const profitLoss = (pips * pipValue * positionSize) / 10;
-            const percentageChange = ((exitPrice - entryPrice) / entryPrice) * 100;
             
             // Update results
             document.getElementById('pips-result').textContent = pips.toFixed(1) + ' pips';
             document.getElementById('profit-loss-result').textContent = formatCurrency(profitLoss);
-            document.getElementById('percentage-change').textContent = percentageChange.toFixed(2) + '%';
-        }
-
-        function calculateMargin() {
-            const pair = document.getElementById('calc-pair-margin').value;
-            const leverage = parseInt(document.getElementById('calc-leverage').value) || 100;
-            const lotSize = parseFloat(document.getElementById('calc-lot-size').value) || 1.00;
-            const currentPrice = parseFloat(document.getElementById('calc-current-price').value) || 1.0500;
-            const accountBalance = parseFloat(document.getElementById('calc-account-balance').value) || 10000;
-            
-            // Calculate margin
-            let contractSize = 100000; // Standard lot
-            if (pair === 'XAU/USD') {
-                contractSize = 100; // Gold contract size
-            }
-            
-            const marginRequired = (lotSize * contractSize * currentPrice) / leverage;
-            const freeMargin = accountBalance - marginRequired;
-            const marginLevel = (accountBalance / marginRequired) * 100;
-            
-            // Update results
-            document.getElementById('required-margin').textContent = formatCurrency(marginRequired);
-            document.getElementById('free-margin').textContent = formatCurrency(freeMargin);
-            document.getElementById('margin-level').textContent = marginLevel.toFixed(2) + '%';
         }
 
         // ===== ANALYSIS FUNCTIONS =====
@@ -3561,16 +3603,6 @@
             return `${sign}$${Math.abs(amount).toFixed(0)}`;
         }
 
-        function getSessionName(session) {
-            switch(session) {
-                case 'sydney': return 'Sydney';
-                case 'asia': return 'Asia';
-                case 'london': return 'London';
-                case 'newyork': return 'New York';
-                default: return '';
-            }
-        }
-
         function addDummyTrades() {
             const dummyTrades = [
                 {
@@ -3587,10 +3619,6 @@
                     entryPrice: 1.0550,
                     stopLoss: 1.0530,
                     takeProfit: 1.0580,
-                    riskUSD: 20,
-                    riskPercent: 1,
-                    potentialReward: 30,
-                    riskRewardRatio: '1.50',
                     trend: 'uptrend',
                     candlePattern: 'Bullish Engulfing',
                     areaType: 'demand',
@@ -3613,10 +3641,6 @@
                     entryPrice: 184.50,
                     stopLoss: 185.00,
                     takeProfit: 183.50,
-                    riskUSD: 12.5,
-                    riskPercent: 0.5,
-                    potentialReward: 25,
-                    riskRewardRatio: '2.00',
                     trend: 'downtrend',
                     candlePattern: 'Bearish Pin Bar',
                     areaType: 'supply',
@@ -3639,10 +3663,6 @@
                     entryPrice: 1945.50,
                     stopLoss: 1940.00,
                     takeProfit: 1955.00,
-                    riskUSD: 50,
-                    riskPercent: 2,
-                    potentialReward: 100,
-                    riskRewardRatio: '2.00',
                     trend: 'uptrend',
                     candlePattern: 'Hammer',
                     areaType: 'snr',
